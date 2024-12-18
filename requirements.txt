@@ -1,0 +1,17 @@
+# Requests library for HTTP API interaction
+requests==2.31.0
+
+# JSON handling
+jsonschema==4.19.0
+
+# For better logging and debugging
+loguru==0.7.0
+
+# Optional: for command-line argument parsing and configuration management
+click==8.1.7
+python-dotenv==1.0.0
+
+# Optional: for testing and mocking APIs
+pytest==7.4.2
+pytest-mock==3.11.1
+responses==0.23.3
