@@ -1,8 +1,8 @@
 import requests
 
 class PoetAPI:
-    # BASE_URL = "http://150.214.230.39:8081/api/v1"
-    BASE_URL = "http://localhost:8000/api/v1"
+    BASE_URL = "http://150.214.230.39:8081/api/v1"
+    #BASE_URL = "http://localhost:8000/api/v1"
 
     def __init__(self, base_url=None):
         if base_url:
@@ -65,10 +65,7 @@ class PoetAPI:
             params={"n": n, "mode": mode},
             headers=headers
         )
-        print(response.content)
         response.raise_for_status()
-        print("Respuesta del servidor:")
-        print(response.content)
         return response
 
     def generate_inputs_with_template_id(self, template_id, n=100, mode="random"):

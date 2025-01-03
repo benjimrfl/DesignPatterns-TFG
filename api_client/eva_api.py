@@ -1,6 +1,6 @@
 import requests
 
-class EVAAPI:
+class EvaAPI:
     BASE_URL = "http://150.214.230.39:8082/api/v1"
 
     def __init__(self, base_url=None):
