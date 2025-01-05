@@ -17,5 +17,6 @@ pytest-mock==3.11.1
 responses==0.23.3
 
 # API requirements
-Flask==2.2.3
+Flask>=2.1.0
+Werkzeug>=2.1.0
 

@@ -1,5 +1,5 @@
+from importlib import import_module
 from flask import Flask
-from antipatterns.routes import antipatterns_bp
 from dotenv import load_dotenv
 import os
 from common.middlewares import log_request
@@ -14,13 +14,22 @@ if BEARER is None:
 def create_app():
     
     app = Flask(__name__)
-    app.config.from_object("config.Config")
 
     # Middleware global
     app.before_request(log_request)
 
-    # Registrar los blueprints
-    app.register_blueprint(antipatterns_bp, url_prefix="/antipatterns")
+     # Registrar blueprints automáticamente
+    modules_path = "src.modules"
+    modules_dir = os.path.join(os.path.dirname(__file__), "src", "modules")
+
+    for module_name in os.listdir(modules_dir):
+        module_path = f"{modules_path}.{module_name}.routes"
+        try:
+            module = import_module(module_path)
+            blueprint = getattr(module, f"{module_name}_bp")
+            app.register_blueprint(blueprint, url_prefix=f"/{module_name}")
+        except (ModuleNotFoundError, AttributeError):
+            continue
 
     return app
 

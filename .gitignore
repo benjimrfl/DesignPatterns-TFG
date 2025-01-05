@@ -326,6 +326,10 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.env
+.DS_Store
 
 # Cake - Uncomment if you are using it
 # tools/**
@@ -396,3 +400,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
