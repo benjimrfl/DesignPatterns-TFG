@@ -1,8 +1,9 @@
 from importlib import import_module
-from flask import Flask
+from fastapi import FastAPI
 from dotenv import load_dotenv
 import os
-from common.middlewares import log_request
+import uvicorn
+from common.middlewares import LogRequestMiddleware
 
 load_dotenv()
 
@@ -11,28 +12,27 @@ BEARER = os.getenv("BEARER")
 if BEARER is None:
     raise ValueError("Bearer token is not set in environment variables.")
 
-def create_app():
-    
-    app = Flask(__name__)
+app = FastAPI()
 
-    # Middleware global
-    app.before_request(log_request)
+# Middleware global
+app.add_middleware(LogRequestMiddleware)
 
-     # Registrar blueprints automáticamente
-    modules_path = "src.modules"
-    modules_dir = os.path.join(os.path.dirname(__file__), "src", "modules")
 
-    for module_name in os.listdir(modules_dir):
+# Registrar routers automáticamente desde los módulos
+modules_path = "src.modules"
+modules_dir = os.path.join(os.path.dirname(__file__), "src", "modules")
+
+for module_name in os.listdir(modules_dir):
+    module_dir = os.path.join(modules_dir, module_name)
+    if os.path.isdir(module_dir) and os.path.exists(os.path.join(module_dir, "routes.py")):
         module_path = f"{modules_path}.{module_name}.routes"
         try:
             module = import_module(module_path)
-            blueprint = getattr(module, f"{module_name}_bp")
-            app.register_blueprint(blueprint, url_prefix=f"/{module_name}")
-        except (ModuleNotFoundError, AttributeError):
-            continue
+            router = getattr(module, f"{module_name}_router")
+            app.include_router(router, prefix=f"/{module_name}")
+        except (ModuleNotFoundError, AttributeError) as e:
+            print(f"Skipping module {module_name}: {e}")
 
-    return app
-
-if __name__ == "__main__":
-    app = create_app()
-    app.run(host="0.0.0.0", port=5000)
+# Ejecutar la app en local
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8000)

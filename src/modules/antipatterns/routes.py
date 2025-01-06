@@ -1,9 +1,12 @@
-from flask import Blueprint
+from fastapi import APIRouter
 from antipatterns.controllers import evaluate_antipattern
+from models import AntipatternRequest
 
-antipatterns_bp = Blueprint("antipatterns", __name__)
+# Crear un router
+antipatterns_router = APIRouter()
+
 
 # Define las rutas
-@antipatterns_bp.route("/evaluate", methods=["POST"])
-def evaluate():
-    return evaluate_antipattern()
+@antipatterns_router.post("/evaluate")
+def evaluate(request: AntipatternRequest):
+    return evaluate_antipattern(request.code, request.antipatterns)

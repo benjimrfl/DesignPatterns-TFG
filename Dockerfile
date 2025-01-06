@@ -10,12 +10,8 @@ COPY . .
 # Instalar las dependencias desde requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Exponer el puerto que utiliza la aplicación Flask
-EXPOSE 5000
-
-# Establecer la variable de entorno para Flask
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
+# Exponer el puerto que utiliza la aplicación FastAPI
+EXPOSE 8000
 
 # Comando para ejecutar la aplicación
-CMD ["flask", "run"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
