@@ -1,5 +1,5 @@
 from http.client import HTTPException
-from antipatterns.services import evaluate_code_against_antipatterns
+from antipatterns.services import AntipatternService
 
 def evaluate_antipattern(code, antipatterns):
     try:
@@ -11,7 +11,7 @@ def evaluate_antipattern(code, antipatterns):
             )
 
         # Llamar al servicio de negocio
-        result = evaluate_code_against_antipatterns(code, antipatterns)
+        result = AntipatternService.evaluate(code, antipatterns)
 
         # Devolver respuesta
         return result, 200
