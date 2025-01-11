@@ -1,3 +1,4 @@
+from http.client import HTTPException
 import requests
 
 class OllamaAPI:
@@ -8,16 +9,19 @@ class OllamaAPI:
             self.BASE_URL = base_url
 
     async def textChat(self, content):
-        headers = {
-            "Content-Type": "application/json",
-        }
-        response = requests.post(
-            f"{self.BASE_URL}",
-            json={"model": "llama3.2",
-                  "prompt": content,
-                  "stream": False
-                  },
-            headers=headers
-        )
-        response.raise_for_status()
-        return response.json()    
+        try:
+            headers = {
+                "Content-Type": "application/json",
+            }
+            response = requests.post(
+                f"{self.BASE_URL}",
+                json={"model": "llama3.2",
+                    "prompt": content,
+                    "stream": False
+                    },
+                headers=headers
+            )
+            response.raise_for_status()
+            return response.json()    
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))

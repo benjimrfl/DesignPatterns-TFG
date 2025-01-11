@@ -1,3 +1,4 @@
+from http.client import HTTPException
 import requests
 
 class PoetAPI:
@@ -54,19 +55,22 @@ class PoetAPI:
         return response.json()
 
     def generate_inputs_with_template(self, payload, n=10, mode="random"):
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-        """Generate inputs using a template."""
-        response = requests.post(
-            f"{self.BASE_URL}/input/generateWithTemplate",
-            json=payload,
-            params={"n": n, "mode": mode},
-            headers=headers
-        )
-        response.raise_for_status()
-        return response
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+            """Generate inputs using a template."""
+            response = requests.post(
+                f"{self.BASE_URL}/input/generateWithTemplate",
+                json=payload,
+                params={"n": n, "mode": mode},
+                headers=headers
+            )
+            response.raise_for_status()
+            return response
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     def generate_inputs_with_template_id(self, template_id, n=100, mode="random"):
         """Generate inputs using a template ID."""

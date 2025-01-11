@@ -331,6 +331,10 @@ __pycache__/
 .env
 .DS_Store
 
+# Python environment
+venv/
+.env/
+
 # Cake - Uncomment if you are using it
 # tools/**
 # !tools/packages.config

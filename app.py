@@ -19,20 +19,29 @@ app.add_middleware(LogRequestMiddleware)
 
 
 # Registrar routers automáticamente desde los módulos
-modules_path = "src.modules"
-modules_dir = os.path.join(os.path.dirname(__file__), "src", "modules")
+
+# Ruta base para los módulos en términos del espacio de nombres de Python
+modules_base_path = "src.modules"
+
+# Directorio base relativo desde app.py
+modules_dir = "src/modules"
 
 for module_name in os.listdir(modules_dir):
-    module_dir = os.path.join(modules_dir, module_name)
-    if os.path.isdir(module_dir) and os.path.exists(os.path.join(module_dir, "routes.py")):
-        module_path = f"{modules_path}.{module_name}.routes"
+    module_path = os.path.join(modules_dir, module_name)
+    # Verificar si es un directorio y contiene `routes.py`
+    if os.path.isdir(module_path) and os.path.exists(os.path.join(module_path, "routes.py")):
+        module_import_path = f"{modules_base_path}.{module_name}.routes"
         try:
-            module = import_module(module_path)
-            router = getattr(module, f"{module_name}_router")
+            module = import_module(module_import_path)
+            print(module)
+            router = getattr(module, f"{module_name}_router", None)
             app.include_router(router, prefix=f"/{module_name}")
-        except (ModuleNotFoundError, AttributeError) as e:
+        except (ModuleNotFoundError) as e:
             print(f"Skipping module {module_name}: {e}")
+print("APP ROUTES:")
+for route in app.routes:
+    print(f"Path: {route.path}, Methods: {route.methods}")
 
 # Ejecutar la app en local
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

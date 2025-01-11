@@ -11,14 +11,25 @@ class LogRequestMiddleware(BaseHTTPMiddleware):
         # Registrar información sobre la solicitud
         logger.info(f"Request: {request.method} {request.url}")
         logger.info(f"Headers: {dict(request.headers)}")
+
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
             logger.info(f"Body: {body.decode('utf-8')}")
-        
-        # Procesar la solicitud
-        response = await call_next(request)
-        
+
+            # Restaurar el cuerpo para las siguientes etapas
+            async def receive_body():
+                return {"type": "http.request", "body": body, "more_body": False}
+
+            request = Request(scope=request.scope, receive=receive_body)
+
+        try:
+            # Procesar la solicitud y capturar excepciones
+            response = await call_next(request)
+        except Exception as e:
+            logger.error(f"Error al procesar la solicitud: {e}")
+            raise
+
         # Registrar la respuesta
         logger.info(f"Response Status Code: {response.status_code}")
-        
+
         return response
