@@ -9,4 +9,4 @@ patterns_router = APIRouter()
 @patterns_router.post("/evaluate")
 async def evaluate(request: PatternRequest):
     print("LLAMANDO AL CONTROLADOR")
-    return await PatternController.evaluate_pattern(request.code, request.pattern)
+    return await PatternController.evaluate_pattern(request.code, request.pattern, request.patternList)

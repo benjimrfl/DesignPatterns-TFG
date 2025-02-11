@@ -2,11 +2,11 @@ from fastapi import HTTPException
 from src.modules.patterns.services import PatternService
 
 class PatternController:
-    async def evaluate_pattern(code, pattern):
+    async def evaluate_pattern(code, pattern, patternList=None):
         try:
             print("LLAMANDO AL SERVICIO")
             # Llamar al servicio de negocio
-            result = await PatternService().evaluate(code, pattern)
+            result = await PatternService().evaluate(code, pattern, patternList)
 
             # Devolver respuesta
             return result

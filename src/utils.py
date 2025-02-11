@@ -6,11 +6,10 @@ from api_client.ollama_api import OllamaAPI
 
 # BEARER = os.getenv("BEARER")
 
+# Clase con métodos accesibles para cualquier módulo
 class Utils:
-    async def _evaluate_query(self, query, type_of_evaluation, expected_result): #metodo comun
-        print("DATA INPUTS:")
-        print(query, type_of_evaluation, expected_result)
-        response = await OllamaAPI().textChat(query)
+    async def _evaluate_query(self, query, type_of_evaluation, expected_result):
+        response = await OllamaAPI().textChat(query) # Es mejor esperar a que termine de responder a todas las preguntas y pasarlas directamente a EVA??
         print("RESPUESTA OLLAMA: ")
         print(response["response"])
         return EvaAPI().evaluate_output(
@@ -18,7 +17,7 @@ class Utils:
             {"expected_result": expected_result, "generated_result": response["response"], "prompt": query},
         )
     
-    async def _calculate_success_ratio(self, data, type_of_evaluation): #metodo comun
+    async def _calculate_success_ratio(self, data, type_of_evaluation):
         positive_count = 0
         for item in data:
             print("ITEM: ")
