@@ -7,6 +7,6 @@ class AntipatternRequest(BaseModel):
     # Validador para el campo `code`
     @field_validator("code")
     def validate_code_length(cls, value):
-        if len(value) > 250:
-            raise ValueError("The code must be less than 250 characters.")
+        if len(value) > 5000:
+            raise ValueError("The code must be less than 5000 characters.")
         return value

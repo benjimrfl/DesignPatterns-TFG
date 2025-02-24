@@ -9,6 +9,7 @@ class AntipatternService:
     async def evaluate(self, code: str, antipatterns: list):
         # Generar entradas usando la API Poet
         payload = self._generate_payload(code, antipatterns)
+        print("LLamando a la api...")
         response = PoetAPI().generate_inputs_with_template(payload)
         print("GENERANDO RESPUESTAS...")
         data = json.loads(response.content.decode('utf-8'))

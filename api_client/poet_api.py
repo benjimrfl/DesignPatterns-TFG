@@ -2,8 +2,8 @@ from fastapi import HTTPException
 import requests
 
 class PoetAPI:
-    BASE_URL = "http://150.214.230.39:8081/api/v1"
-    #BASE_URL = "http://localhost:8000/api/v1"
+    #BASE_URL = "http://150.214.230.39:8081/api/v1"
+    BASE_URL = "http://localhost:8002/api/v1"
 
     def __init__(self, base_url=None):
         if base_url:
@@ -56,6 +56,7 @@ class PoetAPI:
 
     def generate_inputs_with_template(self, payload, n=10, mode="random"):
         try:
+            params = {"n": n, "mode": mode}
             headers = {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
@@ -64,12 +65,13 @@ class PoetAPI:
             response = requests.post(
                 f"{self.BASE_URL}/input/generateWithTemplate",
                 json=payload,
-                params={"n": n, "mode": mode},
+                params=params,
                 headers=headers
             )
             response.raise_for_status()
             return response
         except Exception as e:
+            print(e)
             raise HTTPException(status_code=500, detail=str(e))
 
     def generate_inputs_with_template_id(self, template_id, n=100, mode="random"):
