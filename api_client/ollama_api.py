@@ -23,5 +23,14 @@ class OllamaAPI:
             )
             response.raise_for_status()
             return response.json()    
+        except requests.exceptions.ConnectionError:
+            raise HTTPException(status_code=503, detail="Error: Ollama no está operativo. No se pudo conectar al servicio.")
+    
+        except requests.exceptions.Timeout:
+            raise HTTPException(status_code=504, detail="Error: Ollama no responde. Tiempo de espera agotado.")
+
+        except requests.exceptions.HTTPError as e:
+            raise HTTPException(status_code=response.status_code, detail=f"Error en la API de Ollama: {str(e)}")
+
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=f"Error desconocido: {str(e)}")
