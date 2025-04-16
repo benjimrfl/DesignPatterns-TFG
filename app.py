@@ -33,7 +33,6 @@ for module_name in os.listdir(modules_dir):
         module_import_path = f"{modules_base_path}.{module_name}.routes"
         try:
             module = import_module(module_import_path)
-            print(module)
             router = getattr(module, f"{module_name}_router", None)
             app.include_router(router, prefix=f"/{module_name}")
         except (ModuleNotFoundError) as e:

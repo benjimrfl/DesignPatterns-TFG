@@ -32,13 +32,13 @@ http://localhost:8000/redoc
 
 In this section we show how to use the app with the following example. We need to have POET and EVA api deployed; if you are running it in local, please make sure it is being used the correct url at the api_client.
 
-We are going to make a request to the http://localhost:8000/antipatterns/evaluate endpoint:
+We are going to make a request to the http://localhost:8000/inappropiate-patterns/evaluate endpoint:
 
 
 ````json
 {
   "code": "class TextFileProcessor {\n    public void openFile() {\n        System.out.println(\"Opening text file...\");\n    }\n\n    public void readData() {\n        System.out.println(\"Reading data from text file...\");\n    }\n\n    public void processData() {\n        System.out.println(\"Processing text file data...\");\n    }\n\n    public void closeFile() {\n        System.out.println(\"Text file closed.\");\n    }\n}\n\nclass XMLFileProcessor {\n    public void openFile() {\n        System.out.println(\"Opening XML file...\");\n    }\n\n    public void readData() {\n        System.out.println(\"Reading data from XML file...\");\n    }\n\n    public void processData() {\n        System.out.println(\"Processing XML file data...\");\n    }\n\n    public void closeFile() {\n        System.out.println(\"XML file closed.\");\n    }\n\n    public void validateData() {\n        System.out.println(\"Validating XML file data...\");\n    }\n}\n\nclass BinaryFileProcessor {\n    public void openFile() {\n        System.out.println(\"Opening binary file...\");\n    }\n\n    public void readData() {\n        System.out.println(\"Reading data from binary file...\");\n    }\n\n    public void processData() {\n        System.out.println(\"Processing binary file data...\");\n    }\n\n    public void closeFile() {\n        System.out.println(\"Binary file closed.\");\n    }\n}",
-  "antipatterns": [
+  "inappropiatePatterns": [
     "Template Method"
   ]
 }
