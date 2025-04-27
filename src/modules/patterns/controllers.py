@@ -13,3 +13,15 @@ class PatternController:
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+
+    async def evaluate_YN(payload):
+        try:
+            print("LLAMANDO AL SERVICIO")
+            # Llamar al servicio de negocio
+            result = await PatternService().evaluate_YN(payload)
+
+            # Devolver respuesta
+            return result
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))

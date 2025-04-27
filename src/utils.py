@@ -1,6 +1,8 @@
 import asyncio
 from api_client.eva_api import EvaAPI
 from api_client.ollama_api import OllamaAPI
+from api_client.gemini_api import GeminiAPI
+import os
 
 # Cargar variables de entorno desde .env
 # load_dotenv()
@@ -10,16 +12,16 @@ from api_client.ollama_api import OllamaAPI
 # Clase con métodos accesibles para cualquier módulo
 class Utils:
     async def _evaluate_query(self, query, type_of_evaluation, expected_result, default="fail"):
-        response = await OllamaAPI().textChat(query) # Es mejor esperar a que termine de responder a todas las preguntas y pasarlas directamente a EVA??
-        generated_result = response["response"]
-        print("RESPUESTA OLLAMA: ")
-        print(response["response"])
+        gemini = GeminiAPI(api_key=os.getenv("GEMINI_API_KEY"))
+        response = await gemini.textChat(query) # Es mejor esperar a que termine de responder a todas las preguntas y pasarlas directamente a EVA??
+        print("RESPUESTA GEMINI: ")
+        print(response)
         eva_result = EvaAPI().evaluate_output(
             type_of_evaluation,
-            {"expected_result": expected_result, "generated_result": generated_result, "prompt": query},
+            {"expected_result": expected_result, "generated_result": response, "prompt": query},
             default
         )
-        return eva_result, generated_result
+        return eva_result, response
     
     async def _calculate_success_ratio(self, data, type_of_evaluation, default="fail"):
         positive_count = 0

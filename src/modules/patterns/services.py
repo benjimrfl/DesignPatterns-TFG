@@ -5,8 +5,7 @@ class PatternService:
     async def evaluate(self, code: str, pattern: str, patternList=None):
         # No hace falta generar inputs con POET en este caso
         payload = self._generate_payload(code, pattern, patternList)
-        print("PAYLOAD:")
-        print(payload)
+        print("PAYLOAD:", payload)
 
         # Evaluar resultados
         return await Utils()._calculate_success_ratio(payload, "mc" if patternList else "wh_question")
@@ -21,5 +20,12 @@ class PatternService:
         if(patternList):
             options = " Option A) " + patternList[0] + " Option B) " + patternList[1] + " Option C) " + patternList[2] + ". Provide a response restricted with one of the values of the list including the letter of the option (A, B or C), whitout any explanation"
             payload[0]["query"] = payload[0]["query"] + options
-            print(payload)
         return payload
+    
+    async def evaluate_YN(self, payload):
+
+        dict_payload = [item.model_dump() for item in payload]
+        print("PAYLOAD:", dict_payload)
+
+        # Evaluar resultados
+        return await Utils()._calculate_success_ratio(dict_payload, "yes_no")

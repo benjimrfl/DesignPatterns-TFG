@@ -3,7 +3,7 @@ import requests
 
 class PoetAPI:
     #BASE_URL = "http://150.214.230.39:8081/api/v1"
-    BASE_URL = "http://localhost:8002/api/v1"
+    BASE_URL = "http://localhost:8000/api/v1"
 
     def __init__(self, base_url=None):
         if base_url:
