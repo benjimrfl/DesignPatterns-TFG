@@ -1,12 +1,12 @@
 from fastapi import HTTPException
-from src.modules.antipatterns.services import AntipatternService
+from src.modules.inappropiate_patterns.services import InappropiatePatternervice
 
-class AntipatternController:
-    async def evaluate_antipattern(code, antipatterns):
+class InappropiatePatternController:
+    async def evaluate_inappropiate_pattern(code, inappropiatePatterns):
         try:
             # Llamar al servicio de negocio
             print("LLAMANDO AL SERVICIO")
-            result = await AntipatternService().evaluate(code, antipatterns)
+            result = await InappropiatePatternervice().evaluate(code, inappropiatePatterns)
 
             # Devolver respuesta
             return result

@@ -1,8 +1,8 @@
 from pydantic import BaseModel, field_validator 
 
-class AntipatternRequest(BaseModel):
+class InappropiatePatternRequest(BaseModel):
     code: str
-    antipatterns: list
+    inappropiatePatterns: list
 
     # Validador para el campo `code`
     @field_validator("code")

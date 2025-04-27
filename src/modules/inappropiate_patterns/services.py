@@ -4,11 +4,11 @@ from api_client.eva_api import EvaAPI
 from api_client.ollama_api import OllamaAPI
 from src.utils import Utils
 
-class AntipatternService:
+class InappropiatePatternervice:
 
-    async def evaluate(self, code: str, antipatterns: list):
+    async def evaluate(self, code: str, inappropiatePatterns: list):
         # Generar entradas usando la API Poet
-        payload = self._generate_payload(code, antipatterns)
+        payload = self._generate_payload(code, inappropiatePatterns)
         print("LLamando a la api...")
         response = PoetAPI().generate_inputs_with_template(payload)
         print("GENERANDO RESPUESTAS...")
@@ -19,16 +19,16 @@ class AntipatternService:
         return await Utils()._calculate_success_ratio(data, "yes_no")
         
 
-    def _generate_payload(self, code, antipatterns):
+    def _generate_payload(self, code, inappropiatePatterns):
         return {
-            "base": f"Given the following code: \"{code}\" Is it a good idea to apply the [antipattern] pattern? Answer affirmative or negative",
-            "description": "Template to create antippattern application to a designed code",
+            "base": f"Given the following code: \"{code}\" Is it a good idea to apply the [inappropiatePattern] pattern? Answer with yes or no",
+            "description": "Template to create inappropiate pattern application to a designed code",
             "expected_result": "No",
             "placeholders": [
                 {
-                    "name": "[antipattern]",
-                    "description": "Antipattern code",
-                    "values": antipatterns,
+                    "name": "[inappropiatePattern]",
+                    "description": "Inappropiate pattern code",
+                    "values": inappropiatePatterns,
                 }
             ],
         }
