@@ -19,15 +19,3 @@ class PatternRequest(BaseModel):
                 raise ValueError("patternList must have exactly 3 elements.")
         return value
     
-class EvalItem(BaseModel):
-    query: str
-    type: str
-    expected_result: Literal["Yes", "No"]
-
-    @field_validator("query")
-    def validate_code_length(cls, v):
-        if len(v) > 5000:
-            raise ValueError("The query must be less than 5000 characters.")
-        return v
-
-    

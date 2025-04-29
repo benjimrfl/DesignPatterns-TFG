@@ -1,4 +1,6 @@
+import json
 from src.utils import Utils
+from api_client.poet_api import PoetAPI
 
 class PatternService:
 
@@ -22,9 +24,14 @@ class PatternService:
             payload[0]["query"] = payload[0]["query"] + options
         return payload
     
-    async def evaluate_YN(self, payload):
-
-        dict_payload = [item.model_dump() for item in payload]
+    async def evaluate_YN(self, template):
+        response = PoetAPI().generate_inputs_with_template(template)
+        raw = response.text
+        try:
+            dict_payload = json.loads(raw)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"JSON inválido de Poet: {e}")
+            
         print("PAYLOAD:", dict_payload)
 
         # Evaluar resultados
