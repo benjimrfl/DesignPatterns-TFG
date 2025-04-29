@@ -4,13 +4,13 @@ from api_client.poet_api import PoetAPI
 
 class PatternService:
 
-    async def evaluate(self, code: str, pattern: str, patternList=None):
+    async def evaluate(self, code: str, pattern: str, model, patternList=None):
         # No hace falta generar inputs con POET en este caso
         payload = self._generate_payload(code, pattern, patternList)
         print("PAYLOAD:", payload)
 
         # Evaluar resultados
-        return await Utils()._calculate_success_ratio(payload, "mc" if patternList else "wh_question")
+        return await Utils()._calculate_success_ratio(payload, "mc" if patternList else "wh_question", model)
         
 
     def _generate_payload(self, code, pattern, patternList=None): # Añadimos una lista que es opcional en el caso de utilizar el evaluador mc
@@ -24,7 +24,7 @@ class PatternService:
             payload[0]["query"] = payload[0]["query"] + options
         return payload
     
-    async def evaluate_YN(self, template):
+    async def evaluate_YN(self, template, model):
         response = PoetAPI().generate_inputs_with_template(template)
         raw = response.text
         try:
@@ -35,4 +35,4 @@ class PatternService:
         print("PAYLOAD:", dict_payload)
 
         # Evaluar resultados
-        return await Utils()._calculate_success_ratio(dict_payload, "yes_no")
+        return await Utils()._calculate_success_ratio(dict_payload, "yes_no", model)

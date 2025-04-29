@@ -2,6 +2,7 @@ import asyncio
 from api_client.eva_api import EvaAPI
 from api_client.ollama_api import OllamaAPI
 from api_client.gemini_api import GeminiAPI
+from api_client.open_api import OpenAPI
 import os
 
 # Cargar variables de entorno desde .env
@@ -11,10 +12,21 @@ import os
 
 # Clase con métodos accesibles para cualquier módulo
 class Utils:
-    async def _evaluate_query(self, query, type_of_evaluation, expected_result, default="fail"):
-        gemini = GeminiAPI(api_key=os.getenv("GEMINI_API_KEY"))
-        response = await gemini.textChat(query) # Es mejor esperar a que termine de responder a todas las preguntas y pasarlas directamente a EVA??
-        print("RESPUESTA GEMINI: ")
+    async def _evaluate_query(self, query, type_of_evaluation, expected_result, model, default="fail"):
+        
+        match model.lower():
+            case "gemini":
+                client = GeminiAPI(api_key=os.getenv("GEMINI_API_KEY"))
+                response = await client.textChat(query)
+            case "ollama":
+                response = await OllamaAPI().textChat(query)
+                response = response["response"]
+            case "openai":
+                response = await OpenAPI().textChat(query, os.getenv("OPENAI_API_KEY"))
+            case other:
+                raise ValueError(f"Modelo desconocido: {other!r}")
+
+        print(f"RESPUESTA {model.upper()}:")
         print(response)
         eva_result = EvaAPI().evaluate_output(
             type_of_evaluation,
@@ -23,7 +35,7 @@ class Utils:
         )
         return eva_result, response
     
-    async def _calculate_success_ratio(self, data, type_of_evaluation, default="fail"):
+    async def _calculate_success_ratio(self, data, type_of_evaluation, model, default="fail"):
         positive_count = 0
         negative_cases = []
 
@@ -32,7 +44,7 @@ class Utils:
             print(item)
 
             # Realiza la evaluación para cada query
-            eva_result, generated_result = await self._evaluate_query(item["query"], type_of_evaluation, item["expected_result"], default)
+            eva_result, generated_result = await self._evaluate_query(item["query"], type_of_evaluation, item["expected_result"], model, default)
             print("EVA RESULT: " + eva_result)
 
             # Si el resultado es "pass", incrementa el contador
