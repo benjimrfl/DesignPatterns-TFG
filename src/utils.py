@@ -20,7 +20,7 @@ class Utils:
                 response = await client.textChat(query)
             case "ollama":
                 response = await OllamaAPI().textChat(query)
-                response = response["response"]
+                response = response.get("response", "No response key found in API output")
             case "openai":
                 response = await OpenAPI().textChat(query, os.getenv("OPENAI_API_KEY"))
             case other:
