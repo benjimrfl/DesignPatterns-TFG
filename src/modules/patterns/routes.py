@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.modules.patterns.models import PatternRequest, EvalItem
+from src.modules.patterns.models import PatternRequest
 from src.modules.patterns.controllers import PatternController
 
 # Crear un router
@@ -12,6 +12,6 @@ async def evaluate(request: PatternRequest):
     return await PatternController.evaluate_pattern(request.code, request.pattern, request.patternList)
 
 @patterns_router.post("/evaluateYN")
-async def evaluateYN(payload: list[EvalItem]):
+async def evaluateYN(template: dict):
     print("LLAMANDO AL CONTROLADOR")
-    return await PatternController.evaluate_YN(payload)
+    return await PatternController.evaluate_YN(template)
