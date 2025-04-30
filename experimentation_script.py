@@ -11,8 +11,8 @@ import sys
 # --- Configuración: modifica aquí los templates y modelos para la experimentación ---
 base_url = 'http://localhost:8002'
 poet_url = 'http://localhost:8000'
-template_ids = ['design_pattern_code_eval_1group_yn', 'design_patterns_1group_yn']
-models = ['gemini']
+template_ids = ['design_pattern_code_eval_1group_yn']
+models = ['openai']
 
 # Configuración básica del logger
 logging.basicConfig(
@@ -48,7 +48,7 @@ def evaluate_template(template: dict, model: str) -> dict:
     url = f"{base_url}/patterns/evaluateYN/{model}"
     logger.info("Enviando evaluación para TemplateID=%s con modelo '%s'...", tid, model)
     try:
-        resp = requests.post(url, json=template, timeout=60) # esto puede tardar mucho dependiendo de la template
+        resp = requests.post(url, json=template, timeout=120) # esto puede tardar mucho dependiendo de la template
         resp.raise_for_status()
         result = resp.json()
     except requests.RequestException as e:

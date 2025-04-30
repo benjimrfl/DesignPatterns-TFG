@@ -22,7 +22,8 @@ class Utils:
                 response = await OllamaAPI().textChat(query)
                 response = response.get("response", "No response key found in API output")
             case "openai":
-                response = await OpenAPI().textChat(query, os.getenv("OPENAI_API_KEY"))
+                client = OpenAPI(api_key=os.getenv("OPENAI_API_KEY"))
+                response = client.textChat(query)
             case other:
                 raise ValueError(f"Modelo desconocido: {other!r}")
 
