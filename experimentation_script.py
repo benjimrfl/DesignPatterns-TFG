@@ -12,7 +12,7 @@ import sys
 base_url = 'http://localhost:8002'
 poet_url = 'http://localhost:8000'
 template_ids = ['design_pattern_code_eval_1group_yn']
-models = ['openai']
+models = ['gemini', 'openai']
 
 # Configuración básica del logger
 logging.basicConfig(
@@ -68,7 +68,7 @@ def evaluate_template(template: dict, model: str) -> dict:
         rate_display = 'N/A'
 
     logger.info(
-        "Resultado TemplateID=%s, Modelo='%s' → Passed / Total: %s, Failed / Total: %s, Success Rate: %s",
+        "Resultado TemplateID = %s, Modelo = '%s' → Passed / Total: %s, Failed / Total: %s, Success Rate: %s",
         tid, model, passed, failed, rate_display
     )
     return result

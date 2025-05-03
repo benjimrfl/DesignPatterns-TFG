@@ -43,6 +43,9 @@ class Utils:
         for item in data:
             print("ITEM: ")
             print(item)
+            
+            if model == "openai" or model == "gemini":
+                await asyncio.sleep(1)  # Esperar 1 segundo entre peticiones para evitar problemas de límite de tasa
 
             # Realiza la evaluación para cada query
             eva_result, generated_result = await self._evaluate_query(item["query"], type_of_evaluation, item["expected_result"], model, default)
