@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
-"""
-Script sencillo para automatizar la evaluación de templates contra múltiples modelos.
-Modifica directamente las listas `template_ids` y `models` en el código.
-Usa la librería `logging` para generar salidas estructuradas y maneja excepciones de red.
-"""
 import logging
 import requests
 import sys
+import os
+import csv
+import json
+import re
+from datetime import datetime
 
-# --- Configuración: modifica aquí los templates y modelos para la experimentación ---
+# --- Configuración ---
 base_url = 'http://localhost:8002'
 poet_url = 'http://localhost:8000'
-template_ids = ['design_pattern_code_eval_1group_yn']
-models = ['gemini', 'openai']
+template_ids = ['builder_pattern_code_eval_yn']
+models = ['gemini']
 
-# Configuración básica del logger
+csv_filename = "evaluations.csv"
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -24,11 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_template(template_id: str) -> dict:
-    """Obtiene un template por ID desde la API de POET."""
     url = f"{poet_url}/api/v1/templates/{template_id}"
     logger.info("Solicitando template '%s'...", template_id)
     try:
-        resp = requests.get(url, timeout=10) # los get son rápidos
+        resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         data = resp.json()
         logger.info("Template '%s' obtenido correctamente.", template_id)
@@ -41,24 +41,35 @@ def fetch_template(template_id: str) -> dict:
         raise
 
 
+def extract_design_pattern(query: str) -> str:
+    match = re.search(r'apply the ([a-zA-Z ]+?) pattern', query, re.IGNORECASE)
+    return match.group(1).strip().lower() if match else 'unknown'
+
+
+def write_to_csv(row: dict, filename: str):
+    file_exists = os.path.isfile(filename)
+    with open(filename, mode='a', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=row.keys())
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(row)
+
+
 def evaluate_template(template: dict, model: str) -> dict:
-    """Evalúa el template contra un modelo específico en el servicio de patterns.
-    Extrae y registra métricas clave del resultado."""
     tid = template.get('id', 'unknown')
     url = f"{base_url}/patterns/evaluateYN/{model}"
-    logger.info("Enviando evaluación para TemplateID=%s con modelo '%s'...", tid, model)
+    logger.info("Enviando evaluación para TemplateID = %s con modelo '%s'...", tid, model)
     try:
-        resp = requests.post(url, json=template, timeout=120) # esto puede tardar mucho dependiendo de la template
+        resp = requests.post(url, json=template, timeout=120)
         resp.raise_for_status()
         result = resp.json()
     except requests.RequestException as e:
-        logger.error("Error en la petición de evaluación (TemplateID=%s, modelo=%s): %s", tid, model, e)
+        logger.error("Error en la petición de evaluación (TemplateID = %s, modelo = %s): %s", tid, model, e)
         raise
     except ValueError as e:
-        logger.error("Respuesta JSON inválida al evaluar TemplateID=%s con modelo=%s: %s", tid, model, e)
+        logger.error("Respuesta JSON inválida al evaluar TemplateID = %s con modelo = %s: %s", tid, model, e)
         raise
 
-    # Métricas del resultado
     passed = result.get('passed cases / total tests', 'N/A')
     failed = result.get('failed cases / total tests', 'N/A')
     rate = result.get('evaluation success rate', 'N/A')
@@ -67,10 +78,35 @@ def evaluate_template(template: dict, model: str) -> dict:
     except (ValueError, TypeError):
         rate_display = 'N/A'
 
+    # Extraer detalles de los casos fallidos
+    failed_cases = result.get("failed cases", [])
+    failed_details = []
+    for case in failed_cases:
+        pattern = extract_design_pattern(case.get("query", ""))
+        failed_details.append({
+            "design_pattern": pattern,
+            "expected_result": case.get("expected_result", ""),
+            "generated_result": case.get("generated_result", "").strip()
+        })
+
+    # Escribir al CSV
+    row = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "template_id": tid,
+        "model": model,
+        "passed_cases": passed,
+        "failed_cases": failed,
+        "success_rate": rate_display,
+        "failed_details": json.dumps(failed_details, ensure_ascii=False)
+    }
+
+    write_to_csv(row, csv_filename)
+
     logger.info(
         "Resultado TemplateID = %s, Modelo = '%s' → Passed / Total: %s, Failed / Total: %s, Success Rate: %s",
         tid, model, passed, failed, rate_display
     )
+
     return result
 
 
