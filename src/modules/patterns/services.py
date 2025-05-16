@@ -31,8 +31,6 @@ class PatternService:
             dict_payload = json.loads(raw)
         except json.JSONDecodeError as e:
             raise ValueError(f"JSON inválido de Poet: {e}")
-            
-        print("PAYLOAD:", dict_payload)
 
         # Evaluar resultados
         return await Utils()._calculate_success_ratio(dict_payload, "yes_no", model)

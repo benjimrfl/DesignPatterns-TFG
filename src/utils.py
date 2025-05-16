@@ -4,6 +4,7 @@ from api_client.ollama_api import OllamaAPI
 from api_client.gemini_api import GeminiAPI
 from api_client.open_api import OpenAPI
 import os
+from fastapi import HTTPException
 
 # Cargar variables de entorno desde .env
 # load_dotenv()
@@ -12,37 +13,47 @@ import os
 
 # Clase con métodos accesibles para cualquier módulo
 class Utils:
+    async def _call_with_retry(self, func, max_attempts=2, delay=30):
+        for attempt in range(max_attempts):
+            try:
+                return await func() if asyncio.iscoroutinefunction(func) else func()
+            except HTTPException as e:
+                if e.status_code == 429 and attempt < max_attempts - 1:
+                    print(f"⚠️ Límite alcanzado. Reintentando intento {attempt + 1}/{max_attempts}...")
+                    await asyncio.sleep(delay)
+                    continue
+                raise e
+
     async def _evaluate_query(self, query, type_of_evaluation, expected_result, model, default="fail"):
-        
         match model.lower():
             case "gemini":
                 client = GeminiAPI(api_key=os.getenv("GEMINI_API_KEY"))
-                response = await client.textChat(query)
+                response = await self._call_with_retry(lambda: client.textChat(query))
+
+            case "openai":
+                client = OpenAPI(api_key=os.getenv("OPENAI_API_KEY"))
+                response = await self._call_with_retry(lambda: client.textChat(query))
+
             case "ollama":
                 response = await OllamaAPI().textChat(query)
                 response = response.get("response", "No response key found in API output")
-            case "openai":
-                client = OpenAPI(api_key=os.getenv("OPENAI_API_KEY"))
-                response = client.textChat(query)
+
             case other:
                 raise ValueError(f"Modelo desconocido: {other!r}")
 
-        print(f"RESPUESTA {model.upper()}:")
-        print(response)
         eva_result = EvaAPI().evaluate_output(
             type_of_evaluation,
             {"expected_result": expected_result, "generated_result": response, "prompt": query},
             default
         )
         return eva_result, response
+
     
     async def _calculate_success_ratio(self, data, type_of_evaluation, model, default="fail"):
         positive_count = 0
         negative_cases = []
 
         for item in data:
-            print("ITEM: ")
-            print(item)
             
             if model == "openai" or model == "gemini":
                 await asyncio.sleep(1)  # Esperar 1 segundo entre peticiones para evitar problemas de límite de tasa

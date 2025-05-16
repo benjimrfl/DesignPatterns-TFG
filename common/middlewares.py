@@ -8,13 +8,9 @@ logger = logging.getLogger(__name__)
 
 class LogRequestMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Registrar información sobre la solicitud
-        logger.info(f"Request: {request.method} {request.url}")
-        logger.info(f"Headers: {dict(request.headers)}")
 
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
-            logger.info(f"Body: {body.decode('utf-8')}")
 
             # Restaurar el cuerpo para las siguientes etapas
             async def receive_body():

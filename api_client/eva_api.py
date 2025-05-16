@@ -32,9 +32,6 @@ class EvaAPI:
             )
 
             prepared = req.prepare()
-            print("URL:", prepared.url)
-            print("Headers:", prepared.headers)
-            print("Body:", prepared.body)
             response = requests.Session().send(prepared)
             response.raise_for_status()
             return response.json()
