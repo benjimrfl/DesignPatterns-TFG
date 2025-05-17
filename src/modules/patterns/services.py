@@ -34,3 +34,14 @@ class PatternService:
 
         # Evaluar resultados
         return await Utils()._calculate_success_ratio(dict_payload, "yes_no", model)
+    
+    async def evaluate_json(self, template, model):
+        response = PoetAPI().generate_inputs_with_template(template)
+        raw = response.text
+        try:
+            dict_payload = json.loads(raw)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"JSON inválido de Poet: {e}")
+
+        # Evaluar resultados
+        return await Utils()._calculate_success_ratio(dict_payload, "json", model)
