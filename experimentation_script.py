@@ -11,7 +11,7 @@ from datetime import datetime
 # --- Configuración ---
 base_url = 'http://localhost:8002'
 poet_url = 'http://localhost:8000'
-template_ids = ['builder_pattern_code_eval_yn']
+template_ids = ['adapter_pattern_code_eval_json']
 models = ['gemini']
 
 csv_filename = "evaluations.csv"
@@ -41,11 +41,6 @@ def fetch_template(template_id: str) -> dict:
         raise
 
 
-def extract_design_pattern(query: str) -> str:
-    match = re.search(r'apply the ([a-zA-Z ]+?) pattern', query, re.IGNORECASE)
-    return match.group(1).strip().lower() if match else 'unknown'
-
-
 def write_to_csv(row: dict, filename: str):
     file_exists = os.path.isfile(filename)
     with open(filename, mode='a', newline='', encoding='utf-8') as f:
@@ -57,7 +52,7 @@ def write_to_csv(row: dict, filename: str):
 
 def evaluate_template(template: dict, model: str) -> dict:
     tid = template.get('id', 'unknown')
-    url = f"{base_url}/patterns/evaluateYN/{model}"
+    url = f"{base_url}/patterns/evaluateJSON/{model}"
     logger.info("Enviando evaluación para TemplateID = %s con modelo '%s'...", tid, model)
     try:
         resp = requests.post(url, json=template, timeout=120)
@@ -82,7 +77,7 @@ def evaluate_template(template: dict, model: str) -> dict:
     failed_cases = result.get("failed cases", [])
     failed_details = []
     for case in failed_cases:
-        pattern = extract_design_pattern(case.get("query", ""))
+        pattern = tid.split("_")[0]
         failed_details.append({
             "design_pattern": pattern,
             "expected_result": case.get("expected_result", ""),

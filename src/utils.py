@@ -16,7 +16,10 @@ class Utils:
     async def _call_with_retry(self, func, max_attempts=2, delay=30):
         for attempt in range(max_attempts):
             try:
-                return await func() if asyncio.iscoroutinefunction(func) else func()
+                result = func()
+                if asyncio.iscoroutine(result):
+                    result = await result
+                return result
             except HTTPException as e:
                 if e.status_code == 429 and attempt < max_attempts - 1:
                     print(f"⚠️ Límite alcanzado. Reintentando intento {attempt + 1}/{max_attempts}...")

@@ -15,3 +15,8 @@ async def evaluate(request: PatternRequest):
 async def evaluateYN(template: dict, model: str = Path(..., description="Nombre del modelo, e.g. 'gemini', 'openai'")):
     print("LLAMANDO AL CONTROLADOR")
     return await PatternController.evaluate_YN(template, model)
+
+@patterns_router.post("/evaluateJSON/{model}")
+async def evaluateJSON(template: dict, model: str = Path(..., description="Nombre del modelo, e.g. 'gemini', 'openai'")):
+    print("LLAMANDO AL CONTROLADOR")
+    return await PatternController.evaluate_json(template, model)
