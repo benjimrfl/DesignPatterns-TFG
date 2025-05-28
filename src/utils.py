@@ -3,6 +3,7 @@ from api_client.eva_api import EvaAPI
 from api_client.ollama_api import OllamaAPI
 from api_client.gemini_api import GeminiAPI
 from api_client.open_api import OpenAPI
+from api_client.deepseek_api import DeepSeekAPI
 import os
 from fastapi import HTTPException
 
@@ -35,6 +36,10 @@ class Utils:
 
             case "openai":
                 client = OpenAPI(api_key=os.getenv("OPENAI_API_KEY"))
+                response = await self._call_with_retry(lambda: client.textChat(query))
+                
+            case "deepseek":
+                client = DeepSeekAPI(api_key=os.getenv("DEEPSEEK_API_KEY"))
                 response = await self._call_with_retry(lambda: client.textChat(query))
 
             case "ollama":

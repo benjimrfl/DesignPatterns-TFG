@@ -11,8 +11,8 @@ from datetime import datetime
 # --- Configuración ---
 base_url = 'http://localhost:8002'
 poet_url = 'http://localhost:8000'
-template_ids = ['adapter_pattern_code_eval_json']
-models = ['gemini']
+template_ids = ['factory_pattern_code_eval_json']
+models = ['deepseek']
 
 csv_filename = "evaluations.csv"
 
