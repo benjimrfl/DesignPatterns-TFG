@@ -1,10 +1,14 @@
 from openai import OpenAI
 from fastapi import HTTPException
 
+# Configuration constants
+BASE_URL = "https://api.deepseek.com"
+DEFAULT_MODEL = "deepseek-reasoner"
+
 class DeepSeekAPI:
 
-    def __init__(self, api_key: str, model: str = "deepseek-reasoner"):
-        self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    def __init__(self, api_key: str, model: str = DEFAULT_MODEL):
+        self.client = OpenAI(api_key=api_key, base_url=BASE_URL)
         self.model = model
 
     def textChat(self, prompt: str) -> str:
