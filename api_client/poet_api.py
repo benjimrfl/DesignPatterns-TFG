@@ -54,7 +54,7 @@ class PoetAPI:
         response.raise_for_status()
         return response.json()
 
-    def generate_inputs_with_template(self, payload, n=10, mode="random"):
+    def generate_inputs_with_template(self, payload, n=10, mode="exhaustive"):
         try:
             params = {"n": n, "mode": mode}
             headers = {
@@ -74,7 +74,7 @@ class PoetAPI:
             print(e)
             raise HTTPException(status_code=500, detail=str(e))
 
-    def generate_inputs_with_template_id(self, template_id, n=100, mode="random"):
+    def generate_inputs_with_template_id(self, template_id, n=100, mode="exhaustive"):
         """Generate inputs using a template ID."""
         response = requests.get(
             f"{self.BASE_URL}/input/generateWithTemplateId",

@@ -63,7 +63,7 @@ class Utils:
 
         for item in data:
             
-            if model == "openai" or model == "gemini":
+            if model == "openai" or model == "gemini" or model == "deepseek":
                 await asyncio.sleep(1)  # Esperar 1 segundo entre peticiones para evitar problemas de límite de tasa
 
             # Realiza la evaluación para cada query

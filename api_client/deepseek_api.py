@@ -3,7 +3,7 @@ from fastapi import HTTPException
 
 # Configuration constants
 BASE_URL = "https://api.deepseek.com"
-DEFAULT_MODEL = "deepseek-reasoner"
+DEFAULT_MODEL = "deepseek-chat"
 
 class DeepSeekAPI:
 
@@ -15,7 +15,8 @@ class DeepSeekAPI:
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
+                stream=False
             )
             return response.choices[0].message.content
         except Exception as e:

@@ -1,18 +1,42 @@
 #!/usr/bin/env python3
 import logging
 import requests
-import sys
 import os
 import csv
 import json
-import re
 from datetime import datetime
+import time
 
 # --- Configuración ---
 base_url = 'http://localhost:8002'
 poet_url = 'http://localhost:8000'
-template_ids = ['factory_pattern_code_eval_json']
-models = ['deepseek']
+
+template_ids = [
+    'adapter_pattern_scenario1_code_eval_json',
+    'adapter_pattern_scenario2_code_eval_json',
+    'bridge_pattern_scenario1_code_eval_json',
+    'bridge_pattern_scenario2_code_eval_json',
+    'builder_pattern_scenario1_code_eval_json',
+    'builder_pattern_scenario2_code_eval_json',
+    'composite_pattern_scenario1_code_eval_json',
+    'composite_pattern_scenario2_code_eval_json',
+    'decorator_pattern_scenario1_code_eval_json',
+    'decorator_pattern_scenario2_code_eval_json',
+    'facade_pattern_scenario1_code_eval_json',
+    'facade_pattern_scenario2_code_eval_json',
+    'factory_pattern_scenario1_code_eval_json',
+    'factory_pattern_scenario2_code_eval_json',
+    'observer_pattern_scenario1_code_eval_json',
+    'observer_pattern_scenario2_code_eval_json',
+    'prototype_pattern_scenario1_code_eval_json',
+    'prototype_pattern_scenario2_code_eval_json',
+    'state_pattern_scenario1_code_eval_json',
+    'state_pattern_scenario2_code_eval_json',
+    'strategy_pattern_scenario1_code_eval_json',
+    'strategy_pattern_scenario2_code_eval_json'
+]
+models = ['gemini', 'openai', 'deepseek', 'ollama']
+runs = [1, 2, 3]
 
 csv_filename = "evaluations.csv"
 
@@ -36,9 +60,6 @@ def fetch_template(template_id: str) -> dict:
     except requests.RequestException as e:
         logger.error("Error al solicitar template '%s': %s", template_id, e)
         raise
-    except ValueError as e:
-        logger.error("Respuesta JSON inválida para template '%s': %s", template_id, e)
-        raise
 
 
 def write_to_csv(row: dict, filename: str):
@@ -50,64 +71,58 @@ def write_to_csv(row: dict, filename: str):
         writer.writerow(row)
 
 
-def evaluate_template(template: dict, model: str) -> dict:
-    tid = template.get('id', 'unknown')
+def evaluate_template(template: dict, model: str, template_id: str, run_id: int):
     url = f"{base_url}/patterns/evaluateJSON/{model}"
-    logger.info("Enviando evaluación para TemplateID = %s con modelo '%s'...", tid, model)
+    logger.info("Enviando evaluación para TemplateID = %s con modelo '%s'...", template_id, model)
+
+    start_time = time.perf_counter()
+
     try:
         resp = requests.post(url, json=template, timeout=120)
         resp.raise_for_status()
         result = resp.json()
     except requests.RequestException as e:
-        logger.error("Error en la petición de evaluación (TemplateID = %s, modelo = %s): %s", tid, model, e)
-        raise
-    except ValueError as e:
-        logger.error("Respuesta JSON inválida al evaluar TemplateID = %s con modelo = %s: %s", tid, model, e)
-        raise
+        logger.error("Error en la petición de evaluación (TemplateID = %s, modelo = %s): %s", template_id, model, e)
+        return
 
-    passed = result.get('passed cases / total tests', 'N/A')
-    failed = result.get('failed cases / total tests', 'N/A')
-    rate = result.get('evaluation success rate', 'N/A')
+    end_time = time.perf_counter()
+    duration = round(end_time - start_time, 3)
+
     try:
-        rate_display = f"{float(rate):.2f}%"
+        success_rate = float(result.get('evaluation success rate', 0.0))
     except (ValueError, TypeError):
-        rate_display = 'N/A'
+        success_rate = 0.0
 
-    # Extraer detalles de los casos fallidos
     failed_cases = result.get("failed cases", [])
-    failed_details = []
-    for case in failed_cases:
-        pattern = tid.split("_")[0]
-        failed_details.append({
-            "design_pattern": pattern,
-            "expected_result": case.get("expected_result", ""),
+    failed_details = [
+        {
             "generated_result": case.get("generated_result", "").strip()
-        })
+        }
+        for case in failed_cases
+    ]
 
-    # Escribir al CSV
     row = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "template_id": tid,
+        "pattern": template_id.split("_")[0].capitalize(),
+        "template_id": template_id,
         "model": model,
-        "passed_cases": passed,
-        "failed_cases": failed,
-        "success_rate": rate_display,
+        "run_id": run_id,
+        "success_rate": round(success_rate, 4),
+        "duration_seconds": duration,
         "failed_details": json.dumps(failed_details, ensure_ascii=False)
     }
 
     write_to_csv(row, csv_filename)
 
-    logger.info(
-        "Resultado TemplateID = %s, Modelo = '%s' → Passed / Total: %s, Failed / Total: %s, Success Rate: %s",
-        tid, model, passed, failed, rate_display
-    )
+    logger.info("Resultado → Success: %.2f%% [%s, %s, run %d, duración %.3fs]",
+                success_rate, template_id, model, run_id, duration)
 
     return result
 
 
 if __name__ == '__main__':
-    total = len(template_ids) * len(models)
-    logger.info("Iniciando proceso: %d template(s) x %d modelo(s) = %d solicitudes", len(template_ids), len(models), total)
+    total = len(template_ids) * len(models) * len(runs)
+    logger.info("Iniciando proceso: %d evaluaciones previstas.", total)
 
     for template_id in template_ids:
         try:
@@ -116,9 +131,11 @@ if __name__ == '__main__':
             continue
 
         for model in models:
-            try:
-                _ = evaluate_template(template, model)
-            except Exception:
-                continue
+            for run_id in runs:
+                try:
+                    evaluate_template(template, model, template_id, run_id)
+                except Exception as e:
+                    logger.error("Error al evaluar %s con modelo %s (escenario %s, run %d): %s",
+                                    template_id, model, run_id, e)
 
-    logger.info("Proceso de pruebas finalizado.")
+    logger.info("Proceso de experimentación finalizado.")
